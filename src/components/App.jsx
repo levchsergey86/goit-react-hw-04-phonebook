@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ContactForm from './ContactForm/ContactForm';
 import FilterContacts from './FilterContacts/FilterContacts';
 import ContactList from './ContactList/ContactList';
@@ -9,15 +9,31 @@ const App = () => {
   const [contacts, setContacts] = useState([]);
   const [filter, setFilter] = useState('');
 
+  useEffect(() => {
+    const storedContacts = localStorage.getItem('contacts');
+    if (storedContacts) {
+      setContacts(JSON.parse(storedContacts));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (contacts.length > 0) {
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+    }
+  }, [contacts]);
+
   const deleteContact = id => {
-    setContacts(prevContacts =>
-      prevContacts.filter(contact => contact.id !== id)
-    );
+    setContacts(prevContacts => {
+      const updatedContacts = prevContacts.filter(contact => contact.id !== id);
+      return updatedContacts;
+    });
   };
 
   const addContact = (name, number) => {
     const isContactExists = contacts.some(
-      contact => contact.name === name || contact.number === number
+      contact =>
+        contact.name.toLowerCase() === name.toLowerCase() ||
+        contact.number === number
     );
 
     if (isContactExists) {
